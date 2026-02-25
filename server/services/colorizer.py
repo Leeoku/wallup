@@ -5,6 +5,7 @@ lighting/texture via luminance blending.
 from pathlib import Path
 
 import numpy as np
+import re
 from PIL import Image
 
 
@@ -12,6 +13,16 @@ def hex_to_rgb(hex_color: str) -> tuple[int, int, int]:
     hex_color = hex_color.lstrip("#")
     r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
     return r, g, b
+
+
+def hex_color_check(s):
+    # Pattern to match #RRGGBB or #RGB formats (case-insensitive)
+    # ^ asserts the start of the string.
+    # # matches the literal hash symbol.
+    # (?:[0-9a-fA-F]{3}){1,2} matches either 3 hex chars repeated once, or twice.
+    # $ asserts the end of the string.
+    pattern = r"^#([0-9a-fA-F]{3}){1,2}$"
+    return bool(re.match(pattern, s))
 
 
 def apply_wall_color(

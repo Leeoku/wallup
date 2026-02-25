@@ -4,7 +4,7 @@ from pathlib import Path
 
 from config import settings
 from services.segmentation import segment_walls
-from services.colorizer import apply_wall_color
+from services.colorizer import apply_wall_color, hex_color_check
 
 router = APIRouter(prefix="/images", tags=["images"])
 
@@ -34,6 +34,9 @@ async def recolor_wall(req: ColorRequest):
     input_path = Path(settings.input_folder) / req.filename
     if not input_path.exists():
         raise HTTPException(status_code=404, detail=f"File '{req.filename}' not found in input folder.")
+
+    if not hex_color_check(req.color):
+        raise HTTPException(status_code=422, detail=f"Invalid hex color '{req.color}'. Expected format: #RGB or #RRGGBB.")
 
     # Step 1: Get wall mask from HuggingFace segmentation API
     wall_mask = await segment_walls(input_path)
