@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -14,6 +15,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Wallup", lifespan=lifespan)
+app.mount("/output", StaticFiles(directory=settings.output_folder), name="output")
 app.include_router(images.router)
 
 

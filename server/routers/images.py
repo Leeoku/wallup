@@ -55,6 +55,7 @@ async def recolor_regions(req: ColorRequest):
 
     output_filename = f"{input_path.stem}_recolored{input_path.suffix}"
     output_path = Path(settings.output_folder) / output_filename
+    output_url = f"/output/{output_filename}"
 
     # Step 2: Apply each requested color to its region, chaining on the same output
     current_input = input_path
