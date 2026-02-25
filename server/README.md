@@ -14,6 +14,6 @@
   # Recolor walls
   curl -X POST http://localhost:8000/images/recolor \
     -H "Content-Type: application/json" \
-    -d '{"filename": "room.jpg", "color": "#A3C4BC"}'
+    -d '{"filename": "room.jpg", "regions": {"wall":"#A3C4BC", "floor": "#FF0000"}}'
 
   Output saved to ./images/output/room_recolored.jpg.

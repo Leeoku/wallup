@@ -25,7 +25,7 @@ def hex_color_check(s):
     return bool(re.match(pattern, s))
 
 
-def apply_wall_color(
+def apply_region_color(
     image_path: Path,
     wall_mask: np.ndarray,
     hex_color: str,

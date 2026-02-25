@@ -1,7 +1,7 @@
 """
 Uses the HuggingFace InferenceClient to perform semantic segmentation
-with segformer-b5-finetuned-ade-640-640, then extracts a binary mask
-for 'wall' segments.
+with segformer-b5-finetuned-ade-640-640, then extracts binary masks
+for all regions defined in REGION_LABELS in a single API call.
 """
 from pathlib import Path
 
@@ -10,36 +10,42 @@ from PIL import Image
 from huggingface_hub import InferenceClient
 
 from config import settings
+from constants import REGION_LABELS
 
 MODEL = "nvidia/segformer-b5-finetuned-ade-640-640"
-WALL_LABELS = {"wall", "walls"}
 
 
-async def segment_walls(image_path: Path) -> np.ndarray | None:
+async def segment_regions(image_path: Path) -> dict[str, np.ndarray | None]:
     """
-    Returns a binary numpy mask (H x W, bool) where True = wall pixel.
-    Returns None if no wall segments are detected.
+    Makes a single segmentation API call and returns a binary mask per region.
+
+    Returns:
+        dict mapping region name -> bool mask (H x W) where True = region pixel,
+        or None if no segments matched for that region.
+        e.g. {"wall": np.ndarray, "floor": None}
     """
-    # Use pipe = pipeline("image-segmentation", model="nvidia/segformer-b5-finetuned-ade-640-640")
     client = InferenceClient(token=settings.hf_api_token)
 
     with Image.open(image_path).convert("RGB") as img:
         width, height = img.size
 
-    # NOTE: Output from inference client is a list of SegmentationSegment objects, local transformer returns a plain dicts
-    # Use segment["label"] and segment["mask"] if using local transformer instead of InferenceClient
     segments = client.image_segmentation(image=str(image_path), model=MODEL)
 
-    wall_mask = np.zeros((height, width), dtype=bool)
-    found = False
+    masks = {}
+    found = {}
+    for region in REGION_LABELS:
+        masks[region] = np.zeros((height, width), dtype=bool)
+    for region in REGION_LABELS:
+        found[region] = False
 
     for segment in segments:
         label: str = segment.label.lower()
-        if label in WALL_LABELS:
-            # segment.mask is a PIL Image returned by the InferenceClient. 
-            # Convert to grayscale with half threshhold to get binary mask
-            mask_arr = np.array(segment.mask.convert("L")) > 128
-            wall_mask = np.logical_or(wall_mask, mask_arr)
-            found = True
+        for region, labels in REGION_LABELS.items():
+            if label in labels:
+                # segment.mask is a PIL Image returned by the InferenceClient.
+                # Convert to grayscale with half threshold to get binary mask
+                mask_arr = np.array(segment.mask.convert("L")) > 128
+                masks[region] = np.logical_or(masks[region], mask_arr)
+                found[region] = True
 
-    return wall_mask if found else None
+    return {region: masks[region] if found[region] else None for region in REGION_LABELS}
