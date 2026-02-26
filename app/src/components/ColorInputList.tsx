@@ -1,8 +1,6 @@
 import { ColorInput, Button, Group, Text, SimpleGrid } from "@mantine/core";
 import { defaultColor } from "../App";
-import { IconWand } from '@tabler/icons-react';
-
-const MAX_COLORS = 5;
+import { useColorList } from "../hooks/useColorList";
 
 interface Props {
   colors: string[];
@@ -10,25 +8,12 @@ interface Props {
 }
 
 export default function ColorInputList({ colors, onColorsChange }: Props) {
-
-  const updateColor = (index: number, value: string) => {
-    onColorsChange(colors.map((c, i) => (i === index ? value : c)));
-  };
-
-  const addColor = () => {
-    if (colors.length < MAX_COLORS) {
-      onColorsChange([...colors, defaultColor]);
-    }
-  };
-
-  const removeColor = (index: number) => {
-    onColorsChange(colors.filter((_, i) => i !== index));
-  };
+  const { updateColor, addColor, removeColor, MAX_COLORS } = useColorList(colors, onColorsChange);
 
   return (
     <Group>
       <Text size="lg" mb="md">
-        Color PlayGround
+        Step 2: Color PlayGround
       </Text>
       <Text size="lg" mb="md">
         ({colors.length}/{MAX_COLORS} colors used)
