@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, UploadFile, File
 from pydantic import BaseModel, field_validator
 from pathlib import Path
 
@@ -28,6 +28,19 @@ class ColorResponse(BaseModel):
     input_path: str
     output_path: str
     regions_found: list[str]
+
+
+@router.post("/")
+async def upload_image(file: UploadFile = File(...)):
+    if Path(file.filename).suffix.lower() not in FILE_FORMATS:
+        raise HTTPException(status_code=422, detail=f"Unsupported file type. Allowed: {FILE_FORMATS}")
+
+    dest = Path(settings.input_folder) / file.filename
+    with dest.open("wb") as f:
+        f.write(await file.read())
+
+    return {"filename": file.filename}
+
 
 
 @router.get("/list")
