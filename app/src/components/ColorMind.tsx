@@ -35,7 +35,7 @@ export default function ColorMind({ palette, loading, recommend, colorsCount }: 
                   bg={color}
                   style={{
                     borderRadius: 4,
-                    border: i < colorsCount ? "4px solid #fff" : "none",
+                    boxShadow: i < colorsCount ? "0 0 0 2px #1a1a1a, 0 0 0 4px #fff" : "none",
                   }}
                 />
               </Tooltip>

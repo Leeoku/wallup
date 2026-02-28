@@ -1,17 +1,18 @@
-import { useState } from "react";
 import { Button, Group, Tooltip, Text, Box } from "@mantine/core";
+import { useRecolor } from "../hooks/useRecolor";
 
 interface ColorRegionProps {
     palette: string[];
+    filename: string | null;
+    onRender?: (outputUrl: string) => void;
 }
 
-export default function ColorRegion({ palette }:ColorRegionProps) {
-    const [wallColor, setWallColor] = useState<string | null>(null);
-    const [floorColor, setFloorColor] = useState<string | null>(null);
+export default function ColorRegion({ palette, filename, onRender }: ColorRegionProps) {
+    const { wallColor, setWallColor, floorColor, setFloorColor, loading, error, canRender, render } = useRecolor({ filename, onRender });
 
     return (
         <Box>
-            <Text size="lg" mb="md">Step 4: Select recommended color for image region</Text>
+            <Text size="lg" mb="md">Step 4: Choose region colors</Text>
 
             <Text mb="md">Wall Color</Text>
             <Group mb="md">
@@ -23,7 +24,7 @@ export default function ColorRegion({ palette }:ColorRegionProps) {
                             bg={color}
                             style={{
                                 borderRadius: 4,
-                                border: wallColor === color ? "3px solid #fff" : "3px solid transparent",
+                                boxShadow: wallColor === color ? "0 0 0 2px #1a1a1a, 0 0 0 4px #fff" : "none",
                                 cursor: "pointer",
                             }}
                             onClick={() => setWallColor(color)}
@@ -43,7 +44,7 @@ export default function ColorRegion({ palette }:ColorRegionProps) {
                             bg={color}
                             style={{
                                 borderRadius: 4,
-                                border: floorColor === color ? "3px solid #fff" : "3px solid transparent",
+                                boxShadow: floorColor === color ? "0 0 0 2px #1a1a1a, 0 0 0 4px #fff" : "none",
                                 cursor: "pointer",
                             }}
                             onClick={() => setFloorColor(color)}
@@ -53,9 +54,15 @@ export default function ColorRegion({ palette }:ColorRegionProps) {
                 {floorColor && <Text size="md">{floorColor}</Text>}
             </Group>
 
-            <Button mt="md">
+            {error && <Text size="sm" c="red" mb="xs">{error}</Text>}
+            <Button mt="md" onClick={render} loading={loading} disabled={!canRender}>
                 Render
             </Button>
+            {!canRender && (
+                <Text size="xs" c="dimmed" mt="xs">
+                    Select wall and floor colors to render
+                </Text>
+            )}
         </Box>
     );
 }
