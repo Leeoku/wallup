@@ -15,7 +15,7 @@ export default function ImagePreview({ originalUrl, recoloredUrl }: Props) {
                 <Image
                     src={originalUrl}
                     radius="sm"
-                    style={{ width: "100%", maxHeight: 500, objectFit: "contain" }}
+                    style={{ width: "100%", maxHeight: 600, objectFit: "contain" }}
                 />
             </Box>
             {recoloredUrl && (

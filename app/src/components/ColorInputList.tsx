@@ -26,6 +26,7 @@ export default function ColorInputList({ colors, onColorsChange }: Props) {
               onChange={(value) => updateColor(index, value)}
               format="hex"
               defaultValue={defaultColor}
+              withEyeDropper={false}
             />
             {colors.length > 1 && (
               <Button variant="subtle" color="red" onClick={() => removeColor(index)}>
